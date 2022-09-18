@@ -25,8 +25,5 @@ function Title() {
     Game(textfield.value);
   }
 
-  // skip title in development (temporary)
-  // const nickname = Date.now().toString(16).slice(8);
-  // console.log(nickname);
-  // Game(nickname);
+  Game('jimmy'); // temporary
 }

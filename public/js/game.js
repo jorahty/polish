@@ -71,6 +71,11 @@ function createUI() {
     })
   });
 
+  // create messages container
+  const messagesContainer = createElement(document.body, 'article',
+    { id: 'messagesContainer' }
+  );
+
   // create status bar
   const statusBar = createElement(document.body, 'section',
     { id: 'statusBar' }
@@ -90,11 +95,6 @@ function createUI() {
   // create controls container
   const controlsContainer = createElement(document.body, 'section',
     { id: 'controlsContainer' }
-  );
-
-  // create messages container
-  const messagesContainer = createElement(document.body, 'article',
-    { id: 'messagesContainer' }
   );
 }
 

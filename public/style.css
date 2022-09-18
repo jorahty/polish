@@ -1,0 +1,150 @@
+/* lock screen in place */
+html,
+body { height: 100%; margin: 0; }
+body {
+  -webkit-text-size-adjust: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* prevent selections */
+html {
+  user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+}
+
+html {
+  background: #444;
+}
+
+body {
+  margin: 0 auto;
+  background: #345;
+  display: flex;
+  flex-direction: column;
+  max-width: 60vh;
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: 0.2vh 0 #000, -0.2vh 0 #000;
+  background: #594e81;
+}
+
+body * {
+  font-family: system-ui;
+  font-weight: bold;
+  color: #ddd;
+  font-size: 2vh;
+  text-shadow: 0 0.2vh #000, 0 -0.2vh #000, 0.2vh 0 #000, -0.2vh 0 #000, /**/ 0.15vh 0.15vh #000, 0.15vh -0.15vh #000, -0.15vh 0.15vh #000, -0.15vh -0.15vh #000;
+}
+
+body > * {
+  margin-bottom: 1.5vh;
+}
+
+canvas {
+  width: 100%;
+  border-bottom: 0.2vh solid black;
+}
+
+#leaderboard {
+  position: absolute;
+  padding: 0.5vh;
+  margin: 0;
+}
+
+#leaderboard td {
+  font-size: 1.6vh;
+}
+
+#messagesContainer {
+  position: absolute;
+  bottom: calc(100vh - min(60vh, 100vw));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 10px;
+}
+
+#messagesContianer * {
+  margin: 0;
+}
+
+body > section {
+  padding: 0 1.5vh;
+  display: flex;
+  gap: 1.5vh;
+}
+
+section > * {
+  border-radius: 1.2vh;
+  box-shadow: 0 0 0 0.2vh #000;
+  background: #538aaa;
+}
+
+#statusBar > * {
+  height: 5vh;
+  width: 5vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#healthBar {
+  width: unset;
+  flex-grow: 1;
+  gap: 0.2vh;
+  background: #000;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+#healthBar > div:first-child {
+  width: var(--health);
+  height: 100%;
+  background: #c07578;
+}
+
+#healthBar > div:last-child {
+  width: calc(100% - var(--health) - 0.2vh);
+  height: 100%;
+  background: #888;
+}
+
+#hitpoints {
+  box-shadow: none;
+  background: transparent;
+  justify-content: left;
+}
+
+#controlsContainer {
+  flex-direction: column;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+#controlsContainer button {
+  box-sizing: border-box;
+  border: none;
+  font-size: 4vh;
+  height: calc(50% - 1.5vh / 2);
+  text-transform: uppercase;
+  outline: none;
+}
+
+#controlsContainer button:nth-child(3) {
+  height: 100%;
+}
+
+.down {
+  background: #b977f7;
+}
