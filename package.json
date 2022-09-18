@@ -1,0 +1,12 @@
+{
+  "name": "keygo",
+  "dependencies": {
+    "express": "*",
+    "socket.io": "*",
+    "matter-js": "*",
+    "poly-decomp": "*"
+  },
+  "scripts": {
+    "start": "node src/server.js"
+  }
+}
