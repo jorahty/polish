@@ -8,8 +8,8 @@ function Game(nickname) {
   // decorate, add terrain
   createWorld();
 
-  // create ui (leaderboard, messages, status bar, sword,
-  // shield, health bar, hitpoints, controls container)
+  // create ui (leaderboard, messages, status bar, sword, shield,
+  // health bar, hitpoints, controls container, messages container)
   createUI();
 
   // connect to server, send nickname, get id
@@ -58,8 +58,6 @@ function createWorld() {
   );
 }
 
-// create ui (leaderboard, messages, status bar, sword,
-// shield, health bar, hitpoints, controls container)
 function createUI() {
   // create leaderboard
   const leaderboard = createElement(document.body, 'table',
@@ -72,6 +70,32 @@ function createUI() {
       createElement(row, 'td');
     })
   });
+
+  // create status bar
+  const statusBar = createElement(document.body, 'section',
+    { id: 'statusBar' }
+  );
+
+  // create sword, shield, healthBar, hitpoints
+  const sword = createElement(statusBar, 'div', { id: 'sword', textContent: 0 });
+  const shield = createElement(statusBar, 'div', { id: 'shield', textContent: 0 });
+  const healthBar = createElement(statusBar, 'div', { id: 'healthBar' });
+  [1,2].forEach(() => createElement(healthBar, 'div'));
+  const hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
+
+  // set health
+  document.querySelector(':root').style.setProperty('--health', '100%');
+  hitpoints.textContent = 100;
+
+  // create controls container
+  const controlsContainer = createElement(document.body, 'section',
+    { id: 'controlsContainer' }
+  );
+
+  // create messages container
+  const messagesContainer = createElement(document.body, 'article',
+    { id: 'messagesContainer' }
+  );
 }
 
 function connect(nickname) {
