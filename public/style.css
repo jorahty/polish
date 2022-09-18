@@ -20,7 +20,7 @@ html {
 }
 
 html {
-  background: #444;
+  background: #666;
 }
 
 body {
@@ -71,6 +71,7 @@ body * {
 #go {
   background: #538aaa;
   cursor: pointer;
+  font-weight: 900;
 }
 
 #go:hover {

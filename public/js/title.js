@@ -7,15 +7,16 @@ function Title() {
   
   const textfield = createElement(form, 'input', {
     type: 'text',
-    placeholder: 'name',
+    placeholder: 'Name',
     size: 15,
+    autocomplete: 'off',
     value: sessionStorage.nickname || '',
     id: 'nickname',
   });
   
   const go = createElement(form, 'input', {
     type: 'submit',
-    value: 'go',
+    value: '→',
     disabled: !isValid(textfield.value),
     id: 'go',
   });
