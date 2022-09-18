@@ -8,17 +8,38 @@ Common.setDecomp(require('poly-decomp'));
 // get body shape definitions
 const paths = require('../data/paths.json');
 
-// global variables
-var io, engine, world;
+// global variables (global state)
+var io, engine, world, permanent, static, dynamic, socketIds;
 
 function init(i) {
   io = i;
   
-  console.log('create world');
-  console.log('emit regular updates');
-  console.log('manage connection');
-  console.log('listen for other events');
-
+  // create world, engine; generate initial bodies
+  createWorld();
+  
+  manageConnections();
+  
+  // broadcast regular updates
+  emitRegularUpdates();
+  
+  // listen for and emit special events
+  manageEvents();
 }
 
 module.exports = init;
+
+function createWorld() {
+  console.log('createWorld');
+}
+  
+function manageConnections() {
+  console.log('manageConnections');
+}
+
+function emitRegularUpdates() {
+  console.log('emitRegularUpdates');
+}
+
+function manageEvents() {
+  console.log('manageEvents');
+}
