@@ -43,6 +43,48 @@ body * {
   text-shadow: 0 0.2vh #000, 0 -0.2vh #000, 0.2vh 0 #000, -0.2vh 0 #000, /**/ 0.15vh 0.15vh #000, 0.15vh -0.15vh #000, -0.15vh 0.15vh #000, -0.15vh -0.15vh #000;
 }
 
+/* title */
+
+#joinForm {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 1.5vh;
+}
+
+#joinForm > * {
+  height: 5vh;
+  min-width: 5vh;
+  border-radius: 1.2vh;
+  border: none;
+  box-shadow: 0 0 0 0.2vh #000;
+  outline: none;
+}
+
+#nickname {
+  background: #444;
+  padding-left: 1.5vh;
+}
+
+#go {
+  background: #538aaa;
+  cursor: pointer;
+}
+
+#go:hover {
+  background: #b977f7;
+}
+
+#go:disabled {
+  cursor: default;
+  background: #666;
+  color: #aaa;
+}
+
+/* game */
+
 body > * {
   margin-bottom: 1.5vh;
 }

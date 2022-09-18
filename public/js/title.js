@@ -1,18 +1,23 @@
 function Title() {
   removeChildren(document.body);
   
-  const form = createElement(document.body, 'form');
+  const form = createElement(document.body, 'form',
+    { id: 'joinForm' }
+  );
   
   const textfield = createElement(form, 'input', {
     type: 'text',
     placeholder: 'name',
-    value: localStorage.nickname || '',
+    size: 15,
+    value: sessionStorage.nickname || '',
+    id: 'nickname',
   });
   
   const go = createElement(form, 'input', {
     type: 'submit',
     value: 'go',
     disabled: !isValid(textfield.value),
+    id: 'go',
   });
 
   textfield.oninput = () => {
@@ -21,9 +26,13 @@ function Title() {
 
   form.onsubmit = e => {
     e.preventDefault();
-    localStorage.nickname = textfield.value;
+    sessionStorage.nickname = textfield.value;
     Game(textfield.value);
+
+    // allow user to go back to title
+    window.history.pushState({}, '', '');
+    onpopstate = () => Title();
   }
 
-  Game('jimmy'); // temporary
+  // Game('jimmy'); // temporary
 }
