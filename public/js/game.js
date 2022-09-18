@@ -99,7 +99,8 @@ function createUI() {
 }
 
 function connect(nickname) {
-  console.log(`let's get it, ${nickname}!`);
+  const socket = io();
+  console.log('hello ...');
 }
 
 function renderEvents() {
