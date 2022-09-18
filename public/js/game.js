@@ -51,7 +51,7 @@ function createWorld() {
   Composite.add(world,
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(paths['terrain']), {
-        isStatic: true,
+        isStatic: true, // needed for correct position
         render: { fillStyle: '#789' },
       }
     ),
