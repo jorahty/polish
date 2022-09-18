@@ -4,6 +4,10 @@ var socket, world, ui, myId;
 function Game(nickname) {
   removeChildren(document.body);
 
+  // allow user to go back to title scene
+  window.history.pushState({}, '', '');
+  window.onpopstate = () => Title(socket);
+
   // create matter.js engine, world, renderer, canvas, viewport
   // decorate, add terrain
   createWorld();
@@ -99,8 +103,9 @@ function createUI() {
 }
 
 function connect(nickname) {
-  const socket = io();
-  console.log('hello ...');
+  socket = io();
+
+  
 }
 
 function renderEvents() {

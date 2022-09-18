@@ -64,6 +64,10 @@ function manageConnections() {
 
   io.on('connection', socket => {
     console.log('we got a connection! 😭🎉');
+
+    socket.on('disconnect', () => {
+      console.log('so long, friend 😢');
+    })
   });
 }
 

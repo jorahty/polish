@@ -1,4 +1,5 @@
-function Title() {
+function Title(socket) {
+  if (socket && socket.close) socket.close();
   removeChildren(document.body);
   
   const form = createElement(document.body, 'form',
@@ -29,10 +30,6 @@ function Title() {
     e.preventDefault();
     sessionStorage.nickname = textfield.value;
     Game(textfield.value);
-
-    // allow user to go back to title
-    window.history.pushState({}, '', '');
-    onpopstate = () => Title();
   }
 
   // Game('jimmy'); // temporary
