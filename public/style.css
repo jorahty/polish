@@ -127,7 +127,7 @@ body > section {
   gap: 1.5vh;
 }
 
-section > * {
+body > section > * {
   border-radius: 1.2vh;
   box-shadow: 0 0 0 0.2vh #000;
   background: #538aaa;
