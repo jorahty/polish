@@ -6,28 +6,27 @@ for (const key in Matter) global[key] = Matter[key];
 Common.setDecomp(require('poly-decomp'));
 
 // get body shape definitions
-const paths = require('../data/paths.json');
+const shapes = require('../data/shapes.json');
 
 // global variables (global state)
 var io, engine, world, static, dynamic, socketIds;
 
-function init(i) {
-  io = i;
-  
+// init
+module.exports = (http) => {
+  io = require('socket.io')(http);
+
   // create world, engine; generate initial bodies
   createWorld();
   
   // handle each client connection
   manageConnections();
   
-  // broadcast regular updates to all
+  // broadcast regular updates to all clients
   emitRegularUpdates();
   
   // listen for and emit special events
   manageEvents();
 }
-
-module.exports = init;
 
 function createWorld() {
   engine = Engine.create({ enableSleeping: true }),
@@ -40,7 +39,7 @@ function createWorld() {
   // add terrain
   Composite.add(world,
     Bodies.fromVertices(0, 0,
-      Vertices.fromPath(paths['terrain']),
+      Vertices.fromPath(shapes['terrain']),
       { friction: 0.01, isStatic: true },
     ),
   );
@@ -53,21 +52,43 @@ function createWorld() {
   static = Composite.create();
   Composite.add(world, static);
 
-  // TODO: generate some dynamic and static bodies
+  // TODO: generate some inital dynamic and static bodies
 }
   
 function manageConnections() {
-  let playerCount = 0;
-
   // map player.id (used internally) to socket.id (used to communicate)
   socketIds = new Map();
 
   io.on('connection', socket => {
-    console.log('we got a connection! 😭🎉');
+    let player; // one player per connection
+
+    socket.on('join', (nickname, sendId) => {
+      // create player
+      player = Bodies.fromVertices(0, -300,
+        Vertices.fromPath(shapes['player']), {
+        mass: 0.5,
+        friction: 0.01,
+        shape: 'player',
+        nickname: nickname,
+        health: 100,
+        tokens: 100,
+        sword: 0,
+        shield: 0,
+      });
+
+      socketIds.set(player.id, socket.id) // record socket.id
+
+      sendId(player.id); // inform client of their player's id
+
+      // TODO: privatley emit 'add' for every preexisting body
+
+      add(player); // publicly add player to world
+    });
 
     socket.on('disconnect', () => {
-      console.log('so long, friend 😢');
-    })
+      pop(player); // puplically remove player and drop bag
+      socketIds.delete(player.id) // forget socket.id
+    });
   });
 }
 
@@ -77,4 +98,34 @@ function emitRegularUpdates() {
 
 function manageEvents() {
   console.log('manageEvents');
+}
+
+// helper functions:
+
+// publically add body to world
+// (add to appropriate composite)
+// (send minimum needed options)
+function add(body) {
+  Composite.add(dynamic, body); // add to world
+
+  // inform clients
+  const { shape, position } = body;
+  io.emit('add', body.id, { shape, position });
+}
+
+// publically remove body from world
+// (remove from appropriate composite)
+function remove(body) {
+  Composite.remove(dynamic, body); // remove from world
+  io.emit('remove', body.id); // inform clients
+}
+
+// remove entity from world
+// and drop bag in its place
+function pop(entity) {
+  remove(entity);
+
+  // TODO: drop bag
+  // 1. generate bag from player
+  // 2. add(bag);
 }

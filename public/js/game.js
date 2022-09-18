@@ -54,7 +54,7 @@ function createWorld() {
   // decorate, add terrain
   Composite.add(world,
     Bodies.fromVertices(0, 0,
-      Vertices.fromPath(paths['terrain']), {
+      Vertices.fromPath(shapes['terrain']), {
         isStatic: true, // needed for correct position
         render: { fillStyle: '#789' },
       }
@@ -103,13 +103,30 @@ function createUI() {
 }
 
 function connect(nickname) {
-  socket = io();
+  socket = io(); // establish connection
 
-  
+  // join world, send your nickname, get your id
+  socket.emit('join', nickname, (id) => myId = id);
 }
 
 function renderEvents() {
+  // add appropriate body to world
+  socket.on('add', (id, options) => {
+    const { shape, position } = options;
+    const { x, y } = position;
+    Composite.add(world,
+      Bodies.fromVertices(x, y,
+        Vertices.fromPath(shapes[shape]), {
+          id: id,
+        }
+      )
+    );
+  });
 
+  // remove appropriate body from world
+  socket.on('remove', id => {
+    Composite.remove(world, world.bodies.find(body => body.id === id));
+  });
 }
 
 function configControls() {

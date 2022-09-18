@@ -1,3 +1,9 @@
+# todo
+
+spawn players at one of given spawn locations
+spawn bag/npc at one of given spawn locations
+spawn bag/npc continuously, not just on server startup
+
 # Server
 
 ```js
