@@ -25,9 +25,8 @@ function createElement(parent, type, props) {
 
 // remove all child nodes
 function removeChildren(parent) {
-  while (parent.firstChild) {
-    parent.removeChild(parent.firstChild);
-  }
+  parent.replaceChildren();
+  onkeydown = onkeyup = undefined; // remove event listeners  
 }
 
 // module aliases
