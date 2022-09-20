@@ -75,7 +75,9 @@ function createWorld() {
 
   // inform clients that one or many body(s) were removed from world
   function afterRemove({ object }) {
-    io.emit('remove', Array.isArray(object) ? object.map(b => b.id) : object.id);
+    io.emit('remove',
+      Array.isArray(object) ? object.map(b => b.id) : object.id
+    );
   }
 
   // spawn a bag in a random location every 10 seconds
@@ -186,7 +188,7 @@ function emitRegularUpdates() {
     for (const [playerId, socketId] of socketIds) {
       const you = players.find(player => player.id === playerId);
 
-      const leaderboard = top.includes(you) || !you ? top : top.concat(you);
+      const leaderboard = (top.includes(you) || !you) ? top : top.concat(you);
 
       io.to(socketId).emit('leaderboard', leaderboard.map(
         ({ nickname, tokens }) => ({ nickname, tokens })
