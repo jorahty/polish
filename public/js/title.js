@@ -17,7 +17,9 @@ function Title(socket) {
     value: sessionStorage.nickname || '',
     id: 'nickname',
   });
-  
+
+  textfield.focus();
+
   const go = createElement(form, 'input', {
     type: 'submit',
     value: '→',
