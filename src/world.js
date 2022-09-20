@@ -99,11 +99,9 @@ function manageConnections() {
   socketIds = new Map();
 
   io.on('connection', socket => {
-    var player; // one player per connection
-
     socket.on('join', (nickname, sendId) => {
       // create player
-      player = Bodies.fromVertices(0, -300,
+      const player = Bodies.fromVertices(0, -300,
         Vertices.fromPath(shapes['player']), {
         mass: 0.5,
         friction: 0.01,
@@ -125,37 +123,36 @@ function manageConnections() {
       if (info.length > 0) socket.emit('add', info);
 
       Composite.add(dynamic, player); // publicly add player to world
-    });
 
-    // listen for input
-    // update control state
-    socket.on('input', code => {
-      if (!player) return;
-      const control = code.toLowerCase();
-      const active = control === code;
-      player.controls[control] = active;
-      Sleeping.set(player, false);
-    });
+      // listen for input
+      // update control state
+      socket.on('input', code => {
+        const control = code.toLowerCase();
+        const active = control === code;
+        player.controls[control] = active;
+        Sleeping.set(player, false);
+      });
 
-    // move player according to control state
-    Events.on(engine, 'beforeUpdate', () => {
-      if (!player) return;
-      const { a, d, l } = player.controls;
-      const t = 0.04, f = 0.0015; // magnitudes
+      // move player according to control state
+      Events.on(engine, 'beforeUpdate', movePlayer);
+      function movePlayer() {
+        const { a, d, l } = player.controls;
+        const t = 0.04, f = 0.0015; // magnitudes
 
-      if (a) player.torque = -t;
-      if (d) player.torque = t;
+        if (a) player.torque = -t;
+        if (d) player.torque = t;
 
-      if (l) player.force = {
-        x: f * Math.sin(player.angle),
-        y: -f * Math.cos(player.angle)
-      };
-    });
-
-    socket.on('disconnect', () => {
-      if (!player) return;
-      pop(player); // publicly remove player and drop bag
-      socketIds.delete(player.id) // forget socket.id
+        if (l) player.force = {
+          x: f * Math.sin(player.angle),
+          y: -f * Math.cos(player.angle)
+        };
+      }
+      
+      socket.on('disconnect', () => {
+        pop(player); // publicly remove player and drop bag
+        socketIds.delete(player.id) // forget socket.id
+        Events.off(engine, 'beforeUpdate', movePlayer); // stop moving
+      });
     });
   });
 }
