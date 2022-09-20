@@ -227,6 +227,7 @@ function manageEvents() {
 
     player.tokens += bag.tokens;
     // TODO: check for victory
+    
     if (bag.sword > player.sword) player.sword = bag.sword;
     if (bag.shield > player.shield) player.shield = bag.shield;
   
@@ -239,7 +240,7 @@ function manageEvents() {
   }
 
   function handleStab() {
-    
+
   }
 }
 

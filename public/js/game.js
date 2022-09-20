@@ -191,6 +191,24 @@ function renderEvents() {
       }
     }
   });
+
+  // listen for upgrade
+  socket.on('upgrade', (sword, shield, tokens) => {
+    // TODO: this needs work ...
+    // use svg icons, only display if better than current
+    display(`${sword} ${shield} ${tokens}`);
+    ui.sword.textContent = sword;
+    ui.shield.textContent = shield;
+  });
+
+  function display(message) {
+    const p = createElement(ui.messagesContainer, 'p', {
+      textContent: message,
+    });
+    setTimeout(() => (
+      ui.messagesContainer.removeChild(p)
+    ), 3000);
+  }
 }
 
 function configControls() {

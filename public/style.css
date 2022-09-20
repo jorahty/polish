@@ -135,8 +135,9 @@ canvas {
   gap: 10px;
 }
 
-#messagesContianer * {
+#messagesContainer * {
   margin: 0;
+  font-size: 3vh;
 }
 
 body > section {
