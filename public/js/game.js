@@ -192,7 +192,7 @@ function renderEvents() {
     }
   });
 
-  // listen for upgrade
+  // render upgrade to ui
   socket.on('upgrade', (sword, shield, tokens) => {
     // TODO: this needs work ...
     // use svg icons, only display if better than current
@@ -209,6 +209,31 @@ function renderEvents() {
       ui.messagesContainer.removeChild(p)
     ), 3000);
   }
+
+  // render one or many strike(s)
+  socket.on('strike', object => {
+    const strikes = [].concat(object);
+    strikes.forEach(({ amount, x, y }) => {
+      // create damage indicator
+      const damageIndicator = Body.create({
+        position: { x, y },
+        render: {
+          fillStyle: '#ebbb7d',
+          zIndex: 10,
+          lineWidth: 5,
+          strokeStyle: '#000',
+          text: {
+            content: amount,
+            font: 'bold 48px tommySoft',
+          },
+        },
+      });
+  
+      // render damage indicator for 2 seconds
+      Composite.add(world, damageIndicator);
+      setTimeout(() => Composite.remove(world, damageIndicator), 2000);
+    });
+  });
 }
 
 function configControls() {

@@ -9,7 +9,7 @@ Common.setDecomp(require('poly-decomp'));
 const shapes = require('../data/shapes.json');
 
 // global variables (global state)
-var io, engine, world, static, dynamic, socketIds;
+var io, engine, world, static, dynamic, sockets;
 
 // init
 module.exports = (http) => {
@@ -95,8 +95,8 @@ function createWorld() {
 }
   
 function manageConnections() {
-  // map player.id (used internally) to socket.id (used to communicate)
-  socketIds = new Map();
+  // map player.id (used internally) to socket (used to communicate)
+  sockets = new Map();
 
   io.on('connection', socket => {
     socket.on('join', (nickname, sendId) => {
@@ -114,7 +114,7 @@ function manageConnections() {
         controls: {},
       });
 
-      socketIds.set(player.id, socket.id) // record socket.id
+      sockets.set(player.id, socket) // record socket
 
       sendId(player.id); // inform client of their player's id
 
@@ -150,7 +150,7 @@ function manageConnections() {
       
       socket.on('disconnect', () => {
         pop(player); // publicly remove player and drop bag
-        socketIds.delete(player.id) // forget socket.id
+        sockets.delete(player.id) // forget socket
         Events.off(engine, 'beforeUpdate', movePlayer); // stop moving
       });
     });
@@ -182,12 +182,12 @@ function emitRegularUpdates() {
     const top = players.slice(0, 3);
 
     // send each player their custom leaderboard
-    for (const [playerId, socketId] of socketIds) {
+    for (const [playerId, socket] of sockets) {
       const you = players.find(player => player.id === playerId);
 
       const leaderboard = (top.includes(you) || !you) ? top : top.concat(you);
 
-      io.to(socketId).emit('leaderboard', leaderboard.map(
+      socket.emit('leaderboard', leaderboard.map(
         ({ nickname, tokens }) => ({ nickname, tokens })
       ));
     }
@@ -227,20 +227,65 @@ function manageEvents() {
 
     player.tokens += bag.tokens;
     // TODO: check for victory
-    
+
     if (bag.sword > player.sword) player.sword = bag.sword;
     if (bag.shield > player.shield) player.shield = bag.shield;
   
     // inform player of their upgrade
-    io.to(socketIds.get(player.id)).emit(
+    sockets.get(player.id).emit(
       'upgrade', player.sword, player.shield, bag.tokens
     );
   
     Composite.remove(static, bag); // publically remove bag from world
   }
 
-  function handleStab() {
+  function handleStab(bodyA, bodyB, activeContacts, collision) {
+    // both bodies must be players
+    if (!bodyA.controls || !bodyB.controls) return;
 
+    // must be a stab with nose
+    if (activeContacts.length != 1) return;
+    const { vertex } = activeContacts[0];
+    if (vertex.index != 0) return;
+
+    // identify attacker and victim
+    const attacker = vertex.body;
+    const victim = attacker === bodyA ? bodyB : bodyA;
+
+    if (victim.stabImmune) return; // return if immune
+
+    // make victim immune to stab for 0.5 seconds
+    victim.stabImmune = true;
+    setTimeout(() => victim.stabImmune = false, 500);
+
+    // compute damage
+    const damage = Math.round(collision.depth * 5);
+
+    // inform attacker of strike
+    sockets.get(attacker.id).emit('strike', {
+      amount: damage,
+      x: Math.round(vertex.x),
+      y: Math.round(vertex.y),
+    });
+
+    // decrement victim health
+    victim.health -= damage;
+
+    // check for elimination
+    // and emit 'death' and 'kill' accordingly
+    if (victim.health <= 0) {
+      pop(victim); // publicly remove victim and drop bag
+      
+      sockets.get(victim.id).emit('death', attacker.nickname);
+      sockets.get(attacker.id).emit('kill', victim.nickname);
+
+      // TODO: disconnect victim
+
+      return;
+    }
+
+    // if no elimination, simply inform victim of injury
+    sockets.get(victim.id).emit('injury', victim.health);
   }
 }
 
