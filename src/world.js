@@ -86,7 +86,7 @@ function createWorld() {
     const bag = createBag(
       Math.round(-400 + 800 * Math.random()), // x
       Math.round(-100 - 500 * Math.random()), // y
-      Math.round(Math.random() * 10), // points
+      Math.round(Math.random() * 10), // tokens
       Math.round(Math.random() * 4),  // sword
       Math.round(Math.random() * 4),  // shield
     );
@@ -195,7 +195,52 @@ function emitRegularUpdates() {
 }
 
 function manageEvents() {
-  // TODO
+  // listen for collisions
+  Events.on(engine, "collisionStart", ({ pairs }) => {
+    for (const {bodyA, bodyB, activeContacts, collision} of pairs) {
+      // so far there are only two collisions we care about
+      // 1. upgrade: player-on-bag
+      // 2. stab: player-on-player
+
+      // if neither is player, skip
+      if (!(bodyA.shape === 'player' || bodyB.shape === 'player')) continue;
+
+      // if other is bag, handle upgrade
+      if (bodyA.shape === 'bag') {
+        handleUpgrade(bodyB, bodyA);
+        continue;
+      }
+      if (bodyB.shape === 'bag') { 
+        handleUpgrade(bodyA, bodyB);
+        continue;
+      }
+
+      // if other is player, handle stab
+      if (bodyA.shape === 'player' && bodyB.shape === 'player') {
+        handleStab(bodyA, bodyB, activeContacts, collision);
+      }
+    }
+  });
+
+  function handleUpgrade(player, bag) {
+    if (!bag.isAvailable) return;
+
+    player.tokens += bag.tokens;
+    // TODO: check for victory
+    if (bag.sword > player.sword) player.sword = bag.sword;
+    if (bag.shield > player.shield) player.shield = bag.shield;
+  
+    // inform player of their upgrade
+    io.to(socketIds.get(player.id)).emit(
+      'upgrade', player.sword, player.shield, bag.tokens
+    );
+  
+    Composite.remove(static, bag); // publically remove bag from world
+  }
+
+  function handleStab() {
+    
+  }
 }
 
 // helper functions:
@@ -203,25 +248,31 @@ function manageEvents() {
 // remove entity from world
 // and drop bag in its place
 function pop(entity) {
-  const { position: { x, y }, points, sword, shield } = entity;
+  const { position: { x, y }, tokens, sword, shield } = entity;
   Composite.remove(dynamic, entity);
-  const bag = createBag(x, y, points, sword, shield);
+  const bag = createBag(x, y, tokens, sword, shield);
   Composite.add(static, bag);
 }
 
-function createBag(x, y, points, sword, shield) {
-  return Bodies.fromVertices(x, y,
+function createBag(x, y, tokens, sword, shield) {
+  const bag = Bodies.fromVertices(x, y,
     Vertices.fromPath(shapes['bag']), {
       mass: 0.1,
       friction: 0.001,
       isStatic: true,
       isSensor: true,
       shape: 'bag',
-      points: points,
+      tokens: tokens,
       sword: sword,
       shield: shield,
     }
   );
+
+  // make bag unavailable for half second
+  // so bag is visible before pickup
+  bag.isAvailable = false;
+  setTimeout(() => bag.isAvailable = true, 500);
+  return bag;
 }
 
 // extract minimum info needed for client to render
