@@ -104,7 +104,13 @@ canvas {
 
 #leaderboard td {
   font-size: 1.6vh;
+  color: inherit;
 }
+
+#leaderboard tr:nth-child(1) { color: #fd4; }
+#leaderboard tr:nth-child(2) { color: #abd; }
+#leaderboard tr:nth-child(3) { color: #ea6; }
+#leaderboard tr:nth-child(4) { color: #6bf; }
 
 #messagesContainer {
   position: absolute;
