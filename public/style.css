@@ -46,7 +46,9 @@ body * {
   font-weight: bold;
   color: #ddd;
   font-size: 2vh;
-  text-shadow: 0 0.2vh #000, 0 -0.2vh #000, 0.2vh 0 #000, -0.2vh 0 #000, /**/ 0.15vh 0.15vh #000, 0.15vh -0.15vh #000, -0.15vh 0.15vh #000, -0.15vh -0.15vh #000;
+  text-shadow:
+    0 0.2vh #000, 0 -0.2vh #000, 0.2vh 0 #000, -0.2vh 0 #000,
+    0.15vh 0.15vh #000, 0.15vh -0.15vh #000, -0.15vh 0.15vh #000, -0.15vh -0.15vh #000;
 }
 
 /* title */
