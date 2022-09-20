@@ -69,36 +69,44 @@ function createWorld() {
   function afterAdd({ object }) {
     // extract minimum info needed for client to render
     const info = renderInfo(object);
-    
+
     io.emit('add', info.length === 1 ? info[0] : info);
+    console.log(`'add', info: ${info.length === 1 ? info[0] : info}`);;
   }
 
   // inform clients that one or many body(s) were removed from world
   function afterRemove({ object }) {
     io.emit('remove', Array.isArray(object) ? object.map(b => b.id) : object.id);
+    console.log(`'remove', ids: ${Array.isArray(object) ? object.map(b => b.id) : object.id}`);
   }
 
   // spawn a bag in a random location every 10 seconds
-  setInterval(() => {
-    const bag = createBag(
-      Math.round(-400 + 800 * Math.random()), // x
-      Math.round(500 + -600 * Math.random()), // y
-      Math.round(Math.random() * 10), // points
-      Math.round(Math.random() * 4),  // sword
-      Math.round(Math.random() * 4),  // shield
-    );
-    Composite.add(static, bag);
-  }, 1000 * 10);
+  // setInterval(() => {
+  //   const bag = createBag(
+  //     Math.round(-400 + 800 * Math.random()), // x
+  //     Math.round(500 + -600 * Math.random()), // y
+  //     Math.round(Math.random() * 10), // points
+  //     Math.round(Math.random() * 4),  // sword
+  //     Math.round(Math.random() * 4),  // shield
+  //   );
+  //   Composite.add(static, bag);
+  // }, 1000 * 10);
 }
   
 function manageConnections() {
   // map player.id (used internally) to socket.id (used to communicate)
   socketIds = new Map();
 
+  let playerCount = 0;
+
   io.on('connection', socket => {
     var player; // one player per connection
 
+    console.log('new connection, clientCount', socket.adapter.sids.size);
+    
     socket.on('join', (nickname, sendId) => {
+      console.log(`'join', playerCount: ${++playerCount}`);
+
       // create player
       player = Bodies.fromVertices(0, -300,
         Vertices.fromPath(shapes['player']), {
@@ -107,9 +115,10 @@ function manageConnections() {
         shape: 'player',
         nickname: nickname,
         health: 100,
-        tokens: 100,
+        tokens: 1,
         sword: 0,
         shield: 0,
+        controls: {},
       });
 
       socketIds.set(player.id, socket.id) // record socket.id
@@ -123,10 +132,37 @@ function manageConnections() {
       Composite.add(dynamic, player); // publicly add player to world
     });
 
+    // listen for input
+    // update control state
+    socket.on('input', code => {
+      if (!player) return;
+      const control = code.toLowerCase();
+      const active = control === code;
+      player.controls[control] = active;
+      Sleeping.set(player, false);
+    });
+
+    // move player according to control state
+    Events.on(engine, 'beforeUpdate', () => {
+      if (!player) return;
+      const { a, d, l } = player.controls;
+      const t = 0.04, f = 0.0015; // magnitudes
+
+      if (a) player.torque = -t;
+      if (d) player.torque = t;
+
+      if (l) player.force = {
+        x: f * Math.sin(player.angle),
+        y: -f * Math.cos(player.angle)
+      };
+    });
+
     socket.on('disconnect', () => {
+      console.log(`'disconnect', clientCount: ${socket.adapter.sids.size}`);
       if (!player) return;
       pop(player); // publicly remove player and drop bag
       socketIds.delete(player.id) // forget socket.id
+      console.log(`'leave', playerCount: ${--playerCount}`);
     });
   });
 }
@@ -139,11 +175,33 @@ function emitRegularUpdates() {
       i: b.id,
       x: Math.round(b.position.x),
       y: Math.round(b.position.y),
-      r: Math.round(b.angle * 100) / 100,
+      a: Math.round(b.angle * 100) / 100,
     });
   
     io.volatile.emit('update', gamestate);
   }, 1000 / 60);
+
+  // infrequently emit leaderboard to all clients
+  setInterval(() => {
+    const players = dynamic.bodies.filter(
+      body => body.shape === 'player'
+    );
+
+    players.sort((a, b) => b.tokens - a.tokens);
+
+    const top = players.slice(0, 3);
+
+    // send each player their custom leaderboard
+    for (const [playerId, socketId] of socketIds) {
+      const you = players.find(player => player.id === playerId);
+
+      const leaderboard = top.includes(you) || !you ? top : top.concat(you);
+
+      io.to(socketId).emit('leaderboard', leaderboard.map(
+        ({ nickname, tokens }) => ({ nickname, tokens })
+      ));
+    }
+  }, 3000);
 }
 
 function manageEvents() {

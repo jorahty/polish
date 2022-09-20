@@ -191,8 +191,8 @@ body > section > * {
   outline: none;
 }
 
-#controlsContainer button:nth-child(3) {
-  height: 100%;
+#lButton {
+  height: 100% !important;
 }
 
 .down {

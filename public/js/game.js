@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if they look away (and therefore potentially
   // become idle) kick them back to title scene
-  window.document.onvisibilitychange = () => Title(socket);
+  // window.document.onvisibilitychange = () => Title(socket);
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
@@ -84,7 +84,7 @@ function createUI() {
   );
 
   // create status bar
-  const statusBar = createElement(document.body, 'section',
+  createElement(document.body, 'section',
     { id: 'statusBar' }
   );
 
@@ -103,6 +103,14 @@ function createUI() {
   const controlsContainer = createElement(document.body, 'section',
     { id: 'controlsContainer' }
   );
+
+  // save ui to global state
+  ui = {
+    leaderboard,
+    messagesContainer,
+    sword, shield, hitpoints,
+    controlsContainer
+  };
 }
 
 function connect(nickname) {
@@ -110,28 +118,106 @@ function connect(nickname) {
 
   // join world, send your nickname, get your id
   socket.emit('join', nickname, (id) => myId = id);
+  console.log(`'join' nickname ${nickname}`);
 }
 
 function renderEvents() {
   // add one or many body(s) to world
   // render each body according to given info
   socket.on('add', object => {
-    console.log('add', object);
+    const info = [].concat(object);
+    for (const { id, shape, position, angle } of info) {
+      Composite.add(world,
+        Bodies.fromVertices(position.x, position.y,
+          Vertices.fromPath(shapes[shape]), {
+            id: id,
+            angle: angle ? angle : 0,
+          }
+        )
+      );
+    }
+    console.log(`'add' info: ${info}`);
   });
 
   // remove one or many body(s) from world
   socket.on('remove', object => {
-    console.log('remove', object);
+    const ids = [].concat(object);
+    console.log(`'remove' ids: ${ids}`);
+    for (const id of ids)
+      Composite.remove(world, world.bodies.find(body => body.id === id));
   });
 
   // update position and rotation of dynamic bodies,
   // move camera, and render next frame
   socket.on('update', gamestate => {
+    for (const { i, x, y, a } of gamestate) {
+      const body = world.bodies.find(body => body.id === i);
+      if (!body) continue;
+      Body.setPosition(body, { x, y }); // update position
+      Body.setAngle(body, a); // update angle
+    }
+
+    moveCamera(); // center viewport around player with myId
     
-    Render.world(render);
+    Render.world(render); // render next frame
+  });
+
+  // have the "camera" follow the player with myId
+  function moveCamera() {
+    // identify body with myId
+    const me = world.bodies.find(body => body.id === myId);
+    if (!me) return;
+
+    // compute render.postion i.e. center of viewport
+    render.position = {
+      x: (render.bounds.min.x + render.bounds.max.x) / 2,
+      y: (render.bounds.min.y + render.bounds.max.y) / 2
+    };
+
+    // compute vector from render.position to player.position
+    const delta = Vector.sub(me.position, render.position);
+
+    if (Vector.magnitude(delta) < 1) return; // don't bother
+
+    // on this update, only move camera 10% of the way
+    Bounds.translate(render.bounds, Vector.mult(delta, 0.1));
+  }
+
+  // render the leaderboard
+  socket.on('leaderboard', lb => {
+    for (let i = 0; i < 4; i++) { // iterate over all 4 rows
+      const row = ui.leaderboard.childNodes[i];
+      if (i < lb.length) {
+        row.firstChild.textContent = lb[i].tokens;
+        row.lastChild.textContent = lb[i].nickname;
+      } else {
+        row.firstChild.textContent = row.lastChild.textContent = '';
+      }
+    }
   });
 }
 
 function configControls() {
+  ['a', 'd', 'l'].forEach(code => {
+    createElement(controlsContainer, 'button', {
+      textContent: code,
+      onpointerdown: e => input(code, true),
+      onpointerup: e => input(code, false),
+      id: `${code}Button`,
+    });
+  });
 
+  onkeydown = e => {
+    if ('adl'.includes(e.key)) input(e.key, true);
+  };
+
+  onkeyup = e => {
+    if ('adl'.includes(e.key)) input(e.key, false);
+  };
+
+  function input(code, down) {
+    document.getElementById(`${code}Button`).className = down ? 'down' : '';
+    if (!down) code = code.toUpperCase();
+    socket.volatile.emit('input', code);
+  }
 }
