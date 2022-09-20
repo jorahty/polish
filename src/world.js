@@ -80,18 +80,18 @@ function createWorld() {
     );
   }
 
-  // spawn a bag in a random location every 10 seconds
+  // spawn a bag in a random location every 2 seconds
   setInterval(() => {
-    if (static.bodies.length > 15) return; // not too many
+    if (static.bodies.length > 3) return; // not too many
     const bag = createBag(
       Math.round(-400 + 800 * Math.random()), // x
-      Math.round(-200 - 300 * Math.random()), // y
+      Math.round(-100 - 500 * Math.random()), // y
       Math.round(Math.random() * 10), // points
       Math.round(Math.random() * 4),  // sword
       Math.round(Math.random() * 4),  // shield
     );
     Composite.add(static, bag);
-  }, 1000 * 10);
+  }, 2000);
 }
   
 function manageConnections() {
