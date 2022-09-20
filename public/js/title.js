@@ -18,6 +18,8 @@ function Title(socket) {
     id: 'nickname',
   });
 
+  if (textfield.value) textfield.focus();
+
   const go = createElement(form, 'input', {
     type: 'submit',
     value: '→',
