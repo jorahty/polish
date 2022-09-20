@@ -71,42 +71,35 @@ function createWorld() {
     const info = renderInfo(object);
 
     io.emit('add', info.length === 1 ? info[0] : info);
-    console.log(`'add', info: ${info.length === 1 ? info[0] : info}`);;
   }
 
   // inform clients that one or many body(s) were removed from world
   function afterRemove({ object }) {
     io.emit('remove', Array.isArray(object) ? object.map(b => b.id) : object.id);
-    console.log(`'remove', ids: ${Array.isArray(object) ? object.map(b => b.id) : object.id}`);
   }
 
   // spawn a bag in a random location every 10 seconds
-  // setInterval(() => {
-  //   const bag = createBag(
-  //     Math.round(-400 + 800 * Math.random()), // x
-  //     Math.round(500 + -600 * Math.random()), // y
-  //     Math.round(Math.random() * 10), // points
-  //     Math.round(Math.random() * 4),  // sword
-  //     Math.round(Math.random() * 4),  // shield
-  //   );
-  //   Composite.add(static, bag);
-  // }, 1000 * 10);
+  setInterval(() => {
+    if (static.bodies.length > 15) return; // not too many
+    const bag = createBag(
+      Math.round(-400 + 800 * Math.random()), // x
+      Math.round(-200 - 300 * Math.random()), // y
+      Math.round(Math.random() * 10), // points
+      Math.round(Math.random() * 4),  // sword
+      Math.round(Math.random() * 4),  // shield
+    );
+    Composite.add(static, bag);
+  }, 1000 * 10);
 }
   
 function manageConnections() {
   // map player.id (used internally) to socket.id (used to communicate)
   socketIds = new Map();
 
-  let playerCount = 0;
-
   io.on('connection', socket => {
     var player; // one player per connection
 
-    console.log('new connection, clientCount', socket.adapter.sids.size);
-    
     socket.on('join', (nickname, sendId) => {
-      console.log(`'join', playerCount: ${++playerCount}`);
-
       // create player
       player = Bodies.fromVertices(0, -300,
         Vertices.fromPath(shapes['player']), {
@@ -158,11 +151,9 @@ function manageConnections() {
     });
 
     socket.on('disconnect', () => {
-      console.log(`'disconnect', clientCount: ${socket.adapter.sids.size}`);
       if (!player) return;
       pop(player); // publicly remove player and drop bag
       socketIds.delete(player.id) // forget socket.id
-      console.log(`'leave', playerCount: ${--playerCount}`);
     });
   });
 }

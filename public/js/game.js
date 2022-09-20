@@ -48,10 +48,11 @@ function createWorld() {
     },
   });
 
-  // center the render viewport (or camera) about origin
+  // set zoom
+  const zoom = 360;
   Render.lookAt(render, {
-    min: { x: -360, y: -360 },
-    max: { x: 360, y: 360 },
+    min: { x: -zoom, y: -zoom },
+    max: { x: zoom, y: zoom },
   });
 
   // decorate, add terrain
@@ -118,7 +119,6 @@ function connect(nickname) {
 
   // join world, send your nickname, get your id
   socket.emit('join', nickname, (id) => myId = id);
-  console.log(`'join' nickname ${nickname}`);
 }
 
 function renderEvents() {
@@ -129,20 +129,16 @@ function renderEvents() {
     for (const { id, shape, position, angle } of info) {
       Composite.add(world,
         Bodies.fromVertices(position.x, position.y,
-          Vertices.fromPath(shapes[shape]), {
-            id: id,
-            angle: angle ? angle : 0,
-          }
+          Vertices.fromPath(shapes[shape]),
+          { id, angle: angle ? angle : 0 }
         )
       );
     }
-    console.log(`'add' info: ${info}`);
   });
 
   // remove one or many body(s) from world
   socket.on('remove', object => {
     const ids = [].concat(object);
-    console.log(`'remove' ids: ${ids}`);
     for (const id of ids)
       Composite.remove(world, world.bodies.find(body => body.id === id));
   });
