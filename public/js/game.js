@@ -9,8 +9,8 @@ function Game(nickname) {
   window.history.pushState({}, '', '');
   window.onpopstate = () => Title(socket);
 
-  // if they look away (and therefore potentially
-  // become idle) kick them back to title scene
+  // if client looks away (and therefore potentially
+  // becomes idle) kick back to title scene
   // window.document.onvisibilitychange = () => Title(socket);
 
   // create matter.js engine, world, render, viewport
