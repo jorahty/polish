@@ -1,7 +1,10 @@
+// create title scene
 function Title(socket) {
+  // reset / cleanup
   if (socket && socket.close) socket.close();
   removeChildren(document.body);
   
+  // create form for joining game
   const form = createElement(document.body, 'form',
     { id: 'joinForm' }
   );
@@ -32,5 +35,5 @@ function Title(socket) {
     Game(textfield.value);
   }
 
-  // Game('jimmy'); // temporary
+  // Game('jimmy'); // temporary dev shortcut
 }

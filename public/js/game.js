@@ -1,15 +1,20 @@
 // global variables (global state)
-var socket, world, ui, myId;
+var socket, world, render, ui, myId;
 
+// create game scene
 function Game(nickname) {
-  removeChildren(document.body);
+  removeChildren(document.body); // clear dom
 
   // allow user to go back to title scene
   window.history.pushState({}, '', '');
   window.onpopstate = () => Title(socket);
 
-  // create matter.js engine, world, renderer, canvas, viewport
-  // decorate, add terrain
+  // if they look away (and therefore potentially
+  // become idle) kick them back to title scene
+  window.document.onvisibilitychange = () => Title(socket);
+
+  // create matter.js engine, world, render, viewport
+  // also decorate world, add terrain
   createWorld();
 
   // create ui (leaderboard, messages, status bar, sword, shield,
@@ -32,7 +37,7 @@ function createWorld() {
   world = engine.world; // part of global state
 
   // create renderer / canvas / viewport
-  const render = Render.create({
+  render = Render.create({
     element: document.body,
     engine: engine,
     options: {
@@ -49,13 +54,11 @@ function createWorld() {
     max: { x: 360, y: 360 },
   });
 
-  Render.run(render); // temporary
-
   // decorate, add terrain
   Composite.add(world,
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(shapes['terrain']), {
-        isStatic: true, // needed for correct position
+        isStatic: true, // needed for correct positioning
         render: { fillStyle: '#789' },
       }
     ),
@@ -110,22 +113,22 @@ function connect(nickname) {
 }
 
 function renderEvents() {
-  // add appropriate body to world
-  socket.on('add', (id, options) => {
-    const { shape, position } = options;
-    const { x, y } = position;
-    Composite.add(world,
-      Bodies.fromVertices(x, y,
-        Vertices.fromPath(shapes[shape]), {
-          id: id,
-        }
-      )
-    );
+  // add one or many body(s) to world
+  // render each body according to given info
+  socket.on('add', object => {
+    console.log('add', object);
   });
 
-  // remove appropriate body from world
-  socket.on('remove', id => {
-    Composite.remove(world, world.bodies.find(body => body.id === id));
+  // remove one or many body(s) from world
+  socket.on('remove', object => {
+    console.log('remove', object);
+  });
+
+  // update position and rotation of dynamic bodies,
+  // move camera, and render next frame
+  socket.on('update', gamestate => {
+    
+    Render.world(render);
   });
 }
 

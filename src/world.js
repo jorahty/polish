@@ -15,7 +15,7 @@ var io, engine, world, static, dynamic, socketIds;
 module.exports = (http) => {
   io = require('socket.io')(http);
 
-  // create world, engine; generate initial bodies
+  // create engine, world; generate initial bodies
   createWorld();
   
   // handle each client connection
@@ -36,23 +36,59 @@ function createWorld() {
   const runner = Runner.create();
   Runner.run(runner, engine);
 
-  // add terrain
+  // there are 3 catagories of bodies: known, static and dynamic
+  // clients are never informed of known bodies in any way, because clients are already aware
+  // whenever a static or dynamic body is added to or removed from the world, clients are informed
+  // moreover, clients are regularly updated on the position and angle of all dynamic bodies that are not sleeping
+  // meanwhile, clients are never updated on the position or angle of a static body,
+  // because the position and angle of a static body should never change
+
+  // add terrain (a 'known' body)
   Composite.add(world,
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(shapes['terrain']),
       { friction: 0.01, isStatic: true },
     ),
   );
-
-  // create composite for dynamic bodies (players, npcs, bullets)
-  dynamic = Composite.create();
-  Composite.add(world, dynamic);
-
-  // create composite for static bodies (loot, bags)
+  
+  // create composite for static bodies
   static = Composite.create();
   Composite.add(world, static);
 
-  // TODO: generate some inital dynamic and static bodies
+  // create composite for dynamic bodies
+  dynamic = Composite.create();
+  Composite.add(world, dynamic);
+
+  // attatch add and remove listeners
+  Events.on(static, "afterAdd", afterAdd);
+  Events.on(dynamic, "afterAdd", afterAdd);
+  Events.on(static, "afterRemove", afterRemove);
+  Events.on(dynamic, "afterRemove", afterRemove);
+
+  // inform clients that one or many body(s) were added to world
+  function afterAdd({ object }) {
+    // extract minimum info needed for client to render
+    const info = renderInfo(object);
+    
+    io.emit('add', info.length === 1 ? info[0] : info);
+  }
+
+  // inform clients that one or many body(s) were removed from world
+  function afterRemove({ object }) {
+    io.emit('remove', Array.isArray(object) ? object.map(b => b.id) : object.id);
+  }
+
+  // spawn a bag in a random location every 10 seconds
+  setInterval(() => {
+    const bag = createBag(
+      Math.round(-400 + 800 * Math.random()), // x
+      Math.round(500 + -600 * Math.random()), // y
+      Math.round(Math.random() * 10), // points
+      Math.round(Math.random() * 4),  // sword
+      Math.round(Math.random() * 4),  // shield
+    );
+    Composite.add(static, bag);
+  }, 1000 * 10);
 }
   
 function manageConnections() {
@@ -60,7 +96,7 @@ function manageConnections() {
   socketIds = new Map();
 
   io.on('connection', socket => {
-    let player; // one player per connection
+    var player; // one player per connection
 
     socket.on('join', (nickname, sendId) => {
       // create player
@@ -80,52 +116,81 @@ function manageConnections() {
 
       sendId(player.id); // inform client of their player's id
 
-      // TODO: privatley emit 'add' for every preexisting body
+      // privatley emit 'add' for every preexisting body
+      const info = renderInfo(static.bodies.concat(dynamic.bodies));
+      if (info.length > 0) socket.emit('add', info);
 
-      add(player); // publicly add player to world
+      Composite.add(dynamic, player); // publicly add player to world
     });
 
     socket.on('disconnect', () => {
-      pop(player); // puplically remove player and drop bag
+      if (!player) return;
+      pop(player); // publicly remove player and drop bag
       socketIds.delete(player.id) // forget socket.id
     });
   });
 }
 
 function emitRegularUpdates() {
-  console.log('emitRegularUpdates');
+  // regularly update clients on the position and
+  // angle of all dynamic bodies that are not sleeping
+  setInterval(() => {
+    const gamestate = dynamic.bodies.flatMap(b => b.isSleeping ? [] : {
+      i: b.id,
+      x: Math.round(b.position.x),
+      y: Math.round(b.position.y),
+      r: Math.round(b.angle * 100) / 100,
+    });
+  
+    io.volatile.emit('update', gamestate);
+  }, 1000 / 60);
 }
 
 function manageEvents() {
-  console.log('manageEvents');
+  // TODO
 }
 
 // helper functions:
 
-// publically add body to world
-// (add to appropriate composite)
-// (send minimum needed options)
-function add(body) {
-  Composite.add(dynamic, body); // add to world
-
-  // inform clients
-  const { shape, position } = body;
-  io.emit('add', body.id, { shape, position });
-}
-
-// publically remove body from world
-// (remove from appropriate composite)
-function remove(body) {
-  Composite.remove(dynamic, body); // remove from world
-  io.emit('remove', body.id); // inform clients
-}
-
 // remove entity from world
 // and drop bag in its place
 function pop(entity) {
-  remove(entity);
+  Composite.remove(dynamic, entity);
 
   // TODO: drop bag
   // 1. generate bag from player
   // 2. add(bag);
+}
+
+function createBag(x, y, points, sword, shield) {
+  return Bodies.fromVertices(x, y,
+    Vertices.fromPath(shapes['bag']), {
+      mass: 0.1,
+      friction: 0.001,
+      isStatic: true,
+      isSensor: true,
+      shape: 'bag',
+      points: points,
+      sword: sword,
+      shield: shield,
+    }
+  );
+}
+
+// extract minimum info needed for client to render
+// (right now this only handles players and bags, using 
+// their shape to distinguish between the two. later,
+// this function needs to evolve to determine exactly
+// what info is needed for rendering each body)
+function renderInfo(object) {
+  const objects = [].concat(object);
+  return objects.map(body => {
+    const bodyInfo = {
+      id: body.id,
+      shape: body.shape,
+      position: body.position,
+    };
+    if (body.shape === 'player') bodyInfo.angle = body.angle;
+    return bodyInfo;
+  });
 }
