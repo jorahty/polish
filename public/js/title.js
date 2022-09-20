@@ -36,6 +36,4 @@ function Title(socket) {
     sessionStorage.nickname = textfield.value;
     Game(textfield.value);
   }
-
-  // Game('jimmy'); // temporary dev shortcut
 }
