@@ -201,8 +201,8 @@ function configControls() {
   ['a', 'd', 'l'].forEach(code => {
     createElement(controlsContainer, 'button', {
       textContent: code,
-      onpointerdown: e => input(code, true),
-      onpointerup: e => input(code, false),
+      onpointerdown: () => input(code, true),
+      onpointerup: () => input(code, false),
       id: `${code}Button`,
     });
   });
