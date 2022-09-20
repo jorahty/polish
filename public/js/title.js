@@ -18,7 +18,7 @@ function Title(socket) {
     id: 'nickname',
   });
 
-  textfield.focus();
+  if (textfield.value) textfield.focus();
 
   const go = createElement(form, 'input', {
     type: 'submit',
