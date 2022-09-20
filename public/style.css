@@ -36,7 +36,6 @@ body {
 }
 
 body * {
-  /* font-family: 'Arial Rounded MT Bold', system-ui; */
   font-family: system-ui;
   font-weight: bold;
   color: #ddd;
