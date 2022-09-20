@@ -204,11 +204,10 @@ function manageEvents() {
 // remove entity from world
 // and drop bag in its place
 function pop(entity) {
+  const { position: { x, y }, points, sword, shield } = entity;
   Composite.remove(dynamic, entity);
-
-  // TODO: drop bag
-  // 1. generate bag from player
-  // 2. add(bag);
+  const bag = createBag(x, y, points, sword, shield);
+  Composite.add(static, bag);
 }
 
 function createBag(x, y, points, sword, shield) {
