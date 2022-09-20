@@ -19,6 +19,12 @@ html {
   -webkit-text-size-adjust: none;
 }
 
+/* use custom font */
+@font-face {
+  font-family: tommySoft;
+  src: url(font/tommy_soft.woff);
+}
+
 html {
   background: #666;
 }
@@ -36,7 +42,7 @@ body {
 }
 
 body * {
-  font-family: system-ui;
+  font-family: tommySoft, system-ui;
   font-weight: bold;
   color: #ddd;
   font-size: 2vh;
