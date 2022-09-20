@@ -224,7 +224,7 @@ function renderEvents() {
           strokeStyle: '#000',
           text: {
             content: amount,
-            font: 'bold 48px tommySoft',
+            font: '48px tommySoft',
           },
         },
       });
@@ -232,6 +232,35 @@ function renderEvents() {
       // render damage indicator for 2 seconds
       Composite.add(world, damageIndicator);
       setTimeout(() => Composite.remove(world, damageIndicator), 2000);
+    });
+  });
+
+  // render new health
+  socket.on('injury', health => {
+    document.querySelector(':root')
+      .style.setProperty('--health', `${health}%`);
+    hitpoints.textContent = health;
+  });
+
+  // render kill message
+  socket.on('kill', nickname => {
+    display(`you eliminated ${nickname}`);
+  });
+
+  // listen for death
+  socket.on('death', nickname => {
+    // set health to zero
+    document.querySelector(':root')
+      .style.setProperty('--health', `${0}%`);
+    hitpoints.textContent = 0;
+
+    display(`${nickname} eliminated you`);
+    createElement(ui.messagesContainer, 'p', {
+      textContent: `${nickname} eliminated you`,
+    });
+    createElement(ui.messagesContainer, 'button', {
+      textContent: `damn.`,
+      onclick: () => Title(socket),
     });
   });
 }

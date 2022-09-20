@@ -274,13 +274,12 @@ function manageEvents() {
     // check for elimination
     // and emit 'death' and 'kill' accordingly
     if (victim.health <= 0) {
-      pop(victim); // publicly remove victim and drop bag
-      
       sockets.get(victim.id).emit('death', attacker.nickname);
       sockets.get(attacker.id).emit('kill', victim.nickname);
 
-      // TODO: disconnect victim
-
+      // disconnect victim
+      // this should also publicly remove victim from world and drop bag
+      sockets.get(victim.id).disconnect(); 
       return;
     }
 
