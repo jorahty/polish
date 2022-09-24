@@ -146,16 +146,16 @@ canvas {
   gap: 10px;
 }
 
-#messagesContainer * {
+#messagesContainer > * {
   margin: 0;
 }
 
 #messagesContainer > h1 {
   display: flex;
+  justify-content: center;
 }
 
 #messagesContainer > h1 > * {
-  min-width: 5vh;
   height: 5vh;
 }
 
@@ -266,4 +266,32 @@ body > section > * {
   background: transparent;
   box-shadow: none;
   margin: 5vh auto 0 auto;
+}
+
+#victory {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 3vh;
+  width: 100%;
+  height: min(60vh, 100vw);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#victory * {
+  color: #ec1;
+  font-size: 5vh;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+#victory *:nth-child(1) {
+  font-size: 9vh;
+}
+
+#victory *:nth-child(3) {
+  font-size: 14vh;
 }

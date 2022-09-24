@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  document.onvisibilitychange = () => returnToTitle();
+  // document.onvisibilitychange = () => returnToTitle();
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
@@ -231,9 +231,10 @@ function renderEvents() {
 
   function display(message) {
     ui.messagesContainer.appendChild(message);
-    setTimeout(() => (
-      ui.messagesContainer.removeChild(message)
-    ), 3000);
+    setTimeout(() => {
+      if (ui.messagesContainer.contains(message))
+        ui.messagesContainer.removeChild(message);
+    }, 3000);
   }
 
   // render one or many strike(s)
@@ -272,7 +273,7 @@ function renderEvents() {
   // listen for death
   socket.on('death', nickname => {
     ui.setHealth(0); // set health to zero
-    clearInterval(window.regenerate) // stop regenerating
+    clearInterval(ui.regenerate) // stop regenerating
 
     // replace controls container with death ui
     ui.controlsContainer.replaceChildren();
@@ -287,11 +288,29 @@ function renderEvents() {
   });
 
   socket.on('victory', nickname => {
-    console.log('victory', nickname);
+    // hide leaderboard and messages
+    ui.leaderboard.style.display = 'none';
+    ui.messagesContainer.style.display = 'none';
+
+    // create victory message
+    ui.victory = createElement(document.body, 'article', { id: 'victory' });
+    createElement(ui.victory, 'div', { textContent: nickname });
+    createElement(ui.victory, 'div', { textContent: 'scored the' });
+    createElement(ui.victory, 'div', { textContent: 'W' });
   });
 
   socket.on('reset', () => {
-    console.log('reset');
+    // show leaderboard and messages
+    ui.leaderboard.style.display = 'block';
+    ui.messagesContainer.replaceChildren();
+    ui.messagesContainer.style.display = 'block';
+
+    // remove victory message
+    document.body.removeChild(ui.victory);
+
+    // reset health, sword, shield
+    ui.setHealth(100, 100);
+    ui.sword.style.fill = ui.shield.style.fill = rarityColors.get(0);
   });
 }
 

@@ -237,7 +237,7 @@ function manageEvents() {
     player.tokens += bag.tokens;
 
     // check for victory
-    if (player.tokens >= 100 && !world.victory) handleVictory(player.nickname);
+    if (player.tokens >= 50 && !world.victory) handleVictory(player.nickname);
 
     // upgrade sword
     if (bag.sword > player.sword) player.sword = bag.sword;
@@ -368,7 +368,8 @@ function handleVictory(nickname) {
     // reset all players' position, shield, sword, tokens
     dynamic.bodies.forEach(body => {
       if (body.shape !== 'player') return;
-      body.tokens = body.sword = body.shield = 0;
+      body.sword = body.shield = 0;
+      body.tokens = 1;
       Body.setPosition(body, {
         x: Math.round(-400 + 800 * Math.random()),
         y: Math.round(-100 - 500 * Math.random()),

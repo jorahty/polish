@@ -7,7 +7,7 @@ const shapes = {
 };
 
 const rarityColors = new Map();
-rarityColors.set(0, '#f00');
+rarityColors.set(0, '#00000033');
 rarityColors.set(1, '#888');
 rarityColors.set(2, '#484');
 rarityColors.set(3, '#08f');

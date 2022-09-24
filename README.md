@@ -2,6 +2,11 @@
 
 is it better to set regenerate interval for every player,
 or just one interval that has to iterate over all players?
+probably the ladder
+we should also make a composite for players so we can iterate over them when resetting after victory
+
+on the client, you shouldnt be creating and remove elemets so much
+instead, just set display to block / none
 
 spawn players at one of given spawn locations
 spawn bag/npc at one of given spawn locations
