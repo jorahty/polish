@@ -1,8 +1,10 @@
-# todo
+# notes
+
+is it better to set regenerate interval for every player,
+or just one interval that has to iterate over all players?
 
 spawn players at one of given spawn locations
 spawn bag/npc at one of given spawn locations
-spawn bag/npc continuously, not just on server startup
 
 # Server
 
@@ -69,3 +71,4 @@ socket.on('event', (arg) => {
 socket.emit('input', code);
 
 ```
+

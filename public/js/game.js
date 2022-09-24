@@ -110,7 +110,19 @@ function createUI() {
   // create healthBar, hitpoints
   const healthBar = createElement(statusBar, 'div', { id: 'healthBar' });
   [1,2].forEach(() => createElement(healthBar, 'div'));
-  ui.hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
+  const hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
+  hitpoints.max = 100; // need to keep track of max health
+  ui.setHealth = (health, maxHealth) => {
+    if (maxHealth) hitpoints.max = maxHealth;
+    hitpoints.textContent = health;
+    const percentFull = Math.round(health / hitpoints.max * 100);
+    document.querySelector(':root')
+      .style.setProperty('--health', `${percentFull}%`);
+  }
+  window.regenerate = setInterval(() => {
+    if (hitpoints.textContent < hitpoints.max)
+      ui.setHealth(parseInt(hitpoints.textContent) + 1);
+  }, 2000);
 
   // set health
   document.querySelector(':root').style.setProperty('--health', '100%');
@@ -196,7 +208,7 @@ function renderEvents() {
   });
 
   // render upgrade to ui
-  socket.on('upgrade', (sword, shield, tokens) => {
+  socket.on('upgrade', (sword, shield, tokens, health, maxHealth) => {
     const message = document.createElement('h1');
     if (sword > ui.sword.level) {
       ui.sword.level = sword;
@@ -208,9 +220,7 @@ function renderEvents() {
       ui.shield.style.fill = rarityColors.get(shield);  
       message.appendChild(ui.shield.cloneNode(true));
       // set health according to currentHealth and maxHealth
-      // document.querySelector(':root')
-      //   .style.setProperty('--health', `${health}%`);
-      // hitpoints.textContent = health;
+      ui.setHealth(health, maxHealth);
     }
     const n = createElement(message, 'span', { textContent: tokens });
     const s = Math.min(tokens * 10, 100);
@@ -250,11 +260,7 @@ function renderEvents() {
   });
 
   // render new health
-  socket.on('injury', health => {
-    document.querySelector(':root')
-      .style.setProperty('--health', `${health}%`);
-    hitpoints.textContent = health;
-  });
+  socket.on('injury', health => ui.setHealth(health));
 
   // render kill message
   socket.on('kill', nickname => {
@@ -265,11 +271,10 @@ function renderEvents() {
 
   // listen for death
   socket.on('death', nickname => {
-    // set health to zero
-    document.querySelector(':root')
-      .style.setProperty('--health', `${0}%`);
-    hitpoints.textContent = 0;
+    ui.setHealth(0); // set health to zero
+    clearInterval(window.regenerate) // stop regenerating
 
+    // replace controls container with death ui
     removeChildren(ui.controlsContainer)
     createElement(ui.controlsContainer, 'p', {
       textContent: `${nickname} eliminated you`,

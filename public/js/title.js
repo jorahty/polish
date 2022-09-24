@@ -3,6 +3,7 @@ function Title(socket) {
   // reset / cleanup
   if (socket && socket.close) socket.close();
   Common._nextId = 0;
+  clearInterval(window.regenerate);
   removeChildren(document.body);
 
   // create form for joining game

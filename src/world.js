@@ -108,10 +108,14 @@ function manageConnections() {
         shape: 'player',
         nickname: nickname,
         health: 100,
+        maxHealth: 100,
         tokens: 1,
         sword: 0,
         shield: 0,
         controls: {},
+        regenerate: setInterval(() => (
+          player.health = Math.min(player.health + 1, player.maxHealth)
+        ), 2000),
       });
 
       sockets.set(player.id, socket) // record socket
@@ -152,6 +156,7 @@ function manageConnections() {
         pop(player); // publicly remove player and drop bag
         sockets.delete(player.id) // forget socket
         Events.off(engine, 'beforeUpdate', movePlayer); // stop moving
+        clearInterval(player.regenerate); // stop regenerating
       });
     });
   });
@@ -229,11 +234,18 @@ function manageEvents() {
     // TODO: check for victory
 
     if (bag.sword > player.sword) player.sword = bag.sword;
-    if (bag.shield > player.shield) player.shield = bag.shield;
+    if (bag.shield > player.shield) {
+      player.shield = bag.shield; // set shield
+      // increase max health and increase current
+      // health to maintain same percentage full
+      const percentFull = player.health / player.maxHealth;
+      player.maxHealth = 100 + 20 * player.shield;
+      player.health = Math.round(player.maxHealth * percentFull);
+    }
 
     // inform player of their upgrade
-    sockets.get(player.id).emit(
-      'upgrade', player.sword, player.shield, bag.tokens
+    sockets.get(player.id).emit('upgrade',
+      player.sword, player.shield, bag.tokens, player.health, player.maxHealth
     );
 
     Composite.remove(static, bag); // publically remove bag from world
