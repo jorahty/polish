@@ -229,9 +229,8 @@ function renderEvents() {
   // render one or many strike(s)
   socket.on('strike', object => {
     const strikes = [].concat(object);
-    strikes.forEach(({ amount, x, y }) => {
-      // create damage indicator
-      const damageIndicator = Body.create({
+    const damageIndicators = strikes.map(({ amount, x, y }) => (
+      Body.create({
         position: { x, y },
         render: {
           fillStyle: `hsl(${-0.5 * amount + 230}, 61%, 70%)`,
@@ -243,12 +242,11 @@ function renderEvents() {
             font: '55px jetFont',
           },
         },
-      });
-
-      // render damage indicator for 2 seconds
-      Composite.add(world, damageIndicator);
-      setTimeout(() => Composite.remove(world, damageIndicator), 2000);
-    });
+      })
+    ));
+    // render damage indicator(s) for 2 seconds
+    Composite.add(world, damageIndicators);
+    setTimeout(() => Composite.remove(world, damageIndicators), 2000);
   });
 
   // render new health
