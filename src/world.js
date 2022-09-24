@@ -271,7 +271,7 @@ function manageEvents() {
     setTimeout(() => victim.stabImmune = false, 500);
 
     // compute damage
-    const damage = Math.round(collision.depth * 5);
+    const damage = Math.round(collision.depth * (2 + attacker.sword));
 
     // inform attacker of strike
     sockets.get(attacker.id).emit('strike', {
