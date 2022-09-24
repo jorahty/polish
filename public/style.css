@@ -199,7 +199,7 @@ body > section > * {
 }
 
 #sword > path, #shield > path {
-  stroke-width: 0.2vh;
+  stroke-width: 1.5px;
 }
 
 #healthBar {
