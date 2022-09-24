@@ -73,7 +73,6 @@ body * {
   box-shadow: 0 0 0 0.2vh #000;
   outline: none;
   padding: 0;
-  font-size: 4vh;
   /* because iOS safari seems to */
   /* prevent box-shadow on input */
   box-shadow: none;
@@ -84,6 +83,7 @@ body * {
 #nickname {
   background: #444;
   padding-left: 1.5vh !important;
+  font-size: min(4vh, 7vw);
 }
 
 #go {
