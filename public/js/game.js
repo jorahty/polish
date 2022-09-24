@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  // document.onvisibilitychange = () => returnToTitle();
+  document.onvisibilitychange = () => returnToTitle();
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
@@ -59,9 +59,9 @@ function createWorld() {
   Composite.add(world,
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(shapes['terrain']), {
-        isStatic: true, // needed for correct positioning
-        render: { fillStyle: '#789' },
-      }
+      isStatic: true, // needed for correct positioning
+      render: { fillStyle: '#789' },
+    }
     ),
   );
 
@@ -78,9 +78,9 @@ function createUI() {
     { id: 'leaderboard' }
   );
 
-  [1,2,3,4].forEach(() => { // 4 rows
+  [1, 2, 3, 4].forEach(() => { // 4 rows
     const row = createElement(leaderboard, 'tr');
-    [1,2].forEach(() => { // 2 columns
+    [1, 2].forEach(() => { // 2 columns
       createElement(row, 'td');
     })
   });
@@ -109,7 +109,7 @@ function createUI() {
 
   // create healthBar, hitpoints
   const healthBar = createElement(statusBar, 'div', { id: 'healthBar' });
-  [1,2].forEach(() => createElement(healthBar, 'div'));
+  [1, 2].forEach(() => createElement(healthBar, 'div'));
   const hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
   hitpoints.max = 100; // need to keep track of max health
   ui.setHealth = (health, maxHealth) => {
@@ -217,7 +217,7 @@ function renderEvents() {
     }
     if (shield > ui.shield.level) {
       ui.shield.level = shield;
-      ui.shield.style.fill = rarityColors.get(shield);  
+      ui.shield.style.fill = rarityColors.get(shield);
       message.appendChild(ui.shield.cloneNode(true));
       // set health according to currentHealth and maxHealth
       ui.setHealth(health, maxHealth);
