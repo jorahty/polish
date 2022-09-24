@@ -1,5 +1,5 @@
 // global variables (global state)
-var socket, world, render, ui, myId;
+var socket, world, fromServer, render, ui, myId;
 
 // create game scene
 function Game(nickname) {
@@ -64,6 +64,10 @@ function createWorld() {
       }
     ),
   );
+
+  // create composite for bodies managed by server
+  fromServer = Composite.create();
+  Composite.add(world, fromServer);
 }
 
 function createUI() {
@@ -131,7 +135,7 @@ function renderEvents() {
   socket.on('add', object => {
     const info = [].concat(object);
     for (const { id, shape, position, angle } of info) {
-      Composite.add(world,
+      Composite.add(fromServer,
         Bodies.fromVertices(position.x, position.y,
           Vertices.fromPath(shapes[shape]),
           { id, angle: angle ? angle : 0 }
@@ -144,14 +148,14 @@ function renderEvents() {
   socket.on('remove', object => {
     const ids = [].concat(object);
     for (const id of ids)
-      Composite.remove(world, world.bodies.find(body => body.id === id));
+      Composite.remove(fromServer, fromServer.bodies.find(body => body.id === id));
   });
 
   // update position and rotation of dynamic bodies,
   // move camera, and render next frame
   socket.on('update', gamestate => {
     for (const { i, x, y, a } of gamestate) {
-      const body = world.bodies.find(body => body.id === i);
+      const body = fromServer.bodies.find(body => body.id === i);
       if (!body) continue;
       Body.setPosition(body, { x, y }); // update position
       Body.setAngle(body, a); // update angle
