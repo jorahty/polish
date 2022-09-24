@@ -170,6 +170,22 @@ body > section > * {
   align-items: center;
 }
 
+#sword, #shield {
+  box-shadow: none;
+  background: none;
+  border-radius: 0;
+  fill: #00000033;
+}
+
+#shield {
+  width: 4vh;
+  padding-right: 0.4vh;
+}
+
+#sword > path, #shield > path {
+  stroke-width: 0.2vh;
+}
+
 #healthBar {
   width: unset;
   flex-grow: 1;

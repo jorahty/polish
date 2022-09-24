@@ -6,6 +6,14 @@ const shapes = {
   "worm": "145 32 1 32 21 1 120 5"
 };
 
+const rarityColors = new Map();
+rarityColors.set(0, '#f00');
+rarityColors.set(1, '#888');
+rarityColors.set(2, '#484');
+rarityColors.set(3, '#08f');
+rarityColors.set(4, '#f0f');
+rarityColors.set(5, '#f80');
+
 const filter = new Filter();
 
 const isValid = nickname => {

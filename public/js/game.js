@@ -67,8 +67,10 @@ function createWorld() {
 }
 
 function createUI() {
+  ui = {};
+
   // create leaderboard
-  const leaderboard = createElement(document.body, 'table',
+  ui.leaderboard = createElement(document.body, 'table',
     { id: 'leaderboard' }
   );
 
@@ -80,38 +82,39 @@ function createUI() {
   });
 
   // create messages container
-  const messagesContainer = createElement(document.body, 'article',
+  ui.messagesContainer = createElement(document.body, 'article',
     { id: 'messagesContainer' }
   );
 
   // create status bar
-  createElement(document.body, 'section',
+  const statusBar = createElement(document.body, 'section',
     { id: 'statusBar' }
   );
 
-  // create sword, shield, healthBar, hitpoints
-  const sword = createElement(statusBar, 'div', { id: 'sword', textContent: 0 });
-  const shield = createElement(statusBar, 'div', { id: 'shield', textContent: 0 });
+  // create sword, shield
+  ['sword', 'shield'].forEach(s => {
+    const el = createElement(statusBar, 'svg');
+    fetch(`./img/${s}.svg`)
+      .then(r => r.text())
+      .then(r => {
+        el.outerHTML = r;
+        ui[s] = document.getElementById(s);
+      });
+  });
+
+  // create healthBar, hitpoints
   const healthBar = createElement(statusBar, 'div', { id: 'healthBar' });
   [1,2].forEach(() => createElement(healthBar, 'div'));
-  const hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
+  ui.hitpoints = createElement(statusBar, 'div', { id: 'hitpoints' });
 
   // set health
   document.querySelector(':root').style.setProperty('--health', '100%');
   hitpoints.textContent = 100;
 
   // create controls container
-  const controlsContainer = createElement(document.body, 'section',
+  ui.controlsContainer = createElement(document.body, 'section',
     { id: 'controlsContainer' }
   );
-
-  // save ui to global state
-  ui = {
-    leaderboard,
-    messagesContainer,
-    sword, shield, hitpoints,
-    controlsContainer
-  };
 }
 
 function connect(nickname) {
@@ -197,8 +200,8 @@ function renderEvents() {
     // TODO: this needs work ...
     // use svg icons, only display if better than current
     display(`${sword} ${shield} ${tokens}`);
-    ui.sword.textContent = sword;
-    ui.shield.textContent = shield;
+    ui.sword.style.fill = rarityColors.get(sword);
+    ui.shield.style.fill = rarityColors.get(shield);
   });
 
   function display(message) {

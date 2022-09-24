@@ -87,8 +87,8 @@ function createWorld() {
       Math.round(-400 + 800 * Math.random()), // x
       Math.round(-100 - 500 * Math.random()), // y
       Math.round(Math.random() * 10), // tokens
-      Math.round(Math.random() * 4),  // sword
-      Math.round(Math.random() * 4),  // shield
+      Math.round(Math.random() * 5),  // sword
+      Math.round(Math.random() * 5),  // shield
     );
     Composite.add(static, bag);
   }, 2000);
