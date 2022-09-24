@@ -1,8 +1,2 @@
 node_modules
 package-lock.json
-
-.gitignore
-.replit
-.replit.nix
-.upm
-.config
