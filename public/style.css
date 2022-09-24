@@ -150,6 +150,23 @@ canvas {
   margin: 0;
 }
 
+#messagesContainer > h1 {
+  display: flex;
+}
+
+#messagesContainer > h1 > * {
+  min-width: 5vh;
+  height: 5vh;
+}
+
+#messagesContainer > h1 > span {
+  line-height: 5vh;
+  font-size: 4vh;
+  width: max-content;
+  padding: 0 0.7vh;
+}
+
+
 body > section {
   padding: 0 1.5vh;
   display: flex;
@@ -178,7 +195,6 @@ body > section > * {
 }
 
 #shield {
-  width: 4vh;
   padding-right: 0.4vh;
 }
 

@@ -99,6 +99,7 @@ function createUI() {
       .then(r => {
         el.outerHTML = r;
         ui[s] = document.getElementById(s);
+        ui[s].level = 0;
       });
   });
 
@@ -197,19 +198,32 @@ function renderEvents() {
 
   // render upgrade to ui
   socket.on('upgrade', (sword, shield, tokens) => {
-    // TODO: this needs work ...
-    // use svg icons, only display if better than current
-    display(`${sword} ${shield} ${tokens}`);
-    ui.sword.style.fill = rarityColors.get(sword);
-    ui.shield.style.fill = rarityColors.get(shield);
+    const message = document.createElement('h1');
+    if (sword > ui.sword.level) {
+      ui.sword.level = sword;
+      ui.sword.style.fill = rarityColors.get(sword);
+      message.appendChild(ui.sword.cloneNode(true));
+    }
+    if (shield > ui.shield.level) {
+      ui.shield.level = shield;
+      ui.shield.style.fill = rarityColors.get(shield);  
+      message.appendChild(ui.shield.cloneNode(true));
+      // set health according to currentHealth and maxHealth
+      // document.querySelector(':root')
+      //   .style.setProperty('--health', `${health}%`);
+      // hitpoints.textContent = health;
+    }
+    const n = createElement(message, 'span', { textContent: tokens });
+    const s = Math.min(tokens * 10, 100);
+    const l = Math.max(-4 * tokens + 90, 50);
+    n.style.color = `hsl(200, ${s}%, ${l}%)`;
+    display(message);
   });
 
   function display(message) {
-    const p = createElement(ui.messagesContainer, 'p', {
-      textContent: message,
-    });
+    ui.messagesContainer.appendChild(message);
     setTimeout(() => (
-      ui.messagesContainer.removeChild(p)
+      ui.messagesContainer.removeChild(message)
     ), 3000);
   }
 
@@ -247,7 +261,9 @@ function renderEvents() {
 
   // render kill message
   socket.on('kill', nickname => {
-    display(`you eliminated ${nickname}`);
+    const message = document.createElement('p');
+    message.textContent = `you eliminated ${nickname}`;
+    display(message);
   });
 
   // listen for death
