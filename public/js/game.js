@@ -155,19 +155,14 @@ function renderEvents() {
       if (!body) continue;
       Body.setPosition(body, { x, y }); // update position
       Body.setAngle(body, a); // update angle
+      if (body.id === myId) moveCameraTo(body);
     }
-
-    moveCamera(); // center viewport around player with myId
 
     Render.world(render); // render next frame
   });
 
   // have the "camera" follow the player with myId
-  function moveCamera() {
-    // identify body with myId
-    const me = world.bodies.find(body => body.id === myId);
-    if (!me) return;
-
+  function moveCameraTo(me) {
     // compute render.postion i.e. center of viewport
     render.position = {
       x: (render.bounds.min.x + render.bounds.max.x) / 2,
