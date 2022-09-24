@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  // window.document.onvisibilitychange = () => Title(socket);
+  window.document.onvisibilitychange = () => Title(socket);
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
