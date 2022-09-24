@@ -7,11 +7,11 @@ function Game(nickname) {
 
   // allow user to go back to title scene
   window.history.pushState({}, '', '');
-  window.onpopstate = () => returnToTitle();
+  onpopstate = () => returnToTitle();
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  window.document.onvisibilitychange = () => returnToTitle();
+  document.onvisibilitychange = () => returnToTitle();
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
