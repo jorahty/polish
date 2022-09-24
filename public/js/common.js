@@ -29,12 +29,6 @@ function createElement(parent, type, props) {
   return el;
 }
 
-// remove all child nodes
-function removeChildren(parent) {
-  parent.replaceChildren();
-  onkeydown = onkeyup = undefined; // remove event listeners  
-}
-
 // module aliases
 const Engine = Matter.Engine,
   Render = Matter.Render,

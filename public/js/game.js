@@ -3,7 +3,7 @@ var socket, world, fromServer, render, ui, myId;
 
 // create game scene
 function Game(nickname) {
-  removeChildren(document.body); // clear dom
+  document.body.replaceChildren(); // clear dom
 
   // allow user to go back to title scene
   window.history.pushState({}, '', '');
@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  window.document.onvisibilitychange = () => Title(socket);
+  // window.document.onvisibilitychange = () => Title(socket);
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
@@ -275,7 +275,7 @@ function renderEvents() {
     clearInterval(window.regenerate) // stop regenerating
 
     // replace controls container with death ui
-    removeChildren(ui.controlsContainer)
+    ui.controlsContainer.replaceChildren();
     createElement(ui.controlsContainer, 'p', {
       textContent: `${nickname} eliminated you`,
     });

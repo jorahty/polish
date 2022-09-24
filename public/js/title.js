@@ -4,7 +4,8 @@ function Title(socket) {
   if (socket && socket.close) socket.close();
   Common._nextId = 0;
   clearInterval(window.regenerate);
-  removeChildren(document.body);
+  onkeydown = onkeyup = undefined;
+  document.body.replaceChildren();
 
   // create form for joining game
   const form = createElement(document.body, 'form',
