@@ -285,6 +285,14 @@ function renderEvents() {
       onclick: () => Title(socket),
     });
   });
+
+  socket.on('victory', nickname => {
+    console.log('victory', nickname);
+  });
+
+  socket.on('reset', () => {
+    console.log('reset');
+  });
 }
 
 function configControls() {

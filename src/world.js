@@ -62,8 +62,8 @@ function createWorld() {
   // attatch add and remove listeners
   Events.on(static, "afterAdd", afterAdd);
   Events.on(dynamic, "afterAdd", afterAdd);
-  Events.on(static, "afterRemove", afterRemove);
-  Events.on(dynamic, "afterRemove", afterRemove);
+  Events.on(static, "beforeRemove", beforeRemove);
+  Events.on(dynamic, "beforeRemove", beforeRemove);
 
   // inform clients that one or many body(s) were added to world
   function afterAdd({ object }) {
@@ -73,8 +73,8 @@ function createWorld() {
     io.emit('add', info.length === 1 ? info[0] : info);
   }
 
-  // inform clients that one or many body(s) were removed from world
-  function afterRemove({ object }) {
+  // inform clients that one or many body(s) are being removed from world
+  function beforeRemove({ object }) {
     io.emit('remove',
       Array.isArray(object) ? object.map(b => b.id) : object.id
     );
@@ -125,6 +125,9 @@ function manageConnections() {
       // privatley emit 'add' for every preexisting body
       const info = renderInfo(static.bodies.concat(dynamic.bodies));
       if (info.length > 0) socket.emit('add', info);
+
+      // if world is in victory state, privately inform client
+      if (world.victory) socket.emit('victory', world.victory);
 
       Composite.add(dynamic, player); // publicly add player to world
 
@@ -230,10 +233,16 @@ function manageEvents() {
   function handleUpgrade(player, bag) {
     if (!bag.isAvailable) return;
 
+    // upgrade tokens
     player.tokens += bag.tokens;
-    // TODO: check for victory
 
+    // check for victory
+    if (player.tokens >= 100 && !world.victory) handleVictory(player.nickname);
+
+    // upgrade sword
     if (bag.sword > player.sword) player.sword = bag.sword;
+
+    // upgrade shield
     if (bag.shield > player.shield) {
       player.shield = bag.shield; // set shield
       // increase max health and increase current
@@ -348,4 +357,28 @@ function renderInfo(object) {
     if (body.shape === 'player') bodyInfo.angle = body.angle;
     return bodyInfo;
   });
+}
+
+function handleVictory(nickname) {
+  world.victory = nickname; // world is now in victory state
+  io.emit('victory', nickname); // inform clients
+
+  // After 10 seconds:
+  setTimeout(() => {
+    // reset all players' position, shield, sword, tokens
+    dynamic.bodies.forEach(body => {
+      if (body.shape !== 'player') return;
+      body.tokens = body.sword = body.shield = 0;
+      Body.setPosition(body, {
+        x: Math.round(-400 + 800 * Math.random()),
+        y: Math.round(-100 - 500 * Math.random()),
+      });
+      Sleeping.set(body, false);
+    });
+
+    Composite.remove(static, static.bodies); // remove all loot
+
+    world.victory = null; // world no longer in victory state
+    io.emit('reset'); // inform clients
+  }, 10 * 1000);
 }
