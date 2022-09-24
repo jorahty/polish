@@ -17,20 +17,20 @@ module.exports = (http) => {
 
   // create engine, world; generate initial bodies
   createWorld();
-  
+
   // handle each client connection
   manageConnections();
-  
+
   // broadcast regular updates to all clients
   emitRegularUpdates();
-  
+
   // listen for and emit special events
   manageEvents();
 }
 
 function createWorld() {
   engine = Engine.create({ enableSleeping: true }),
-  world = engine.world;
+    world = engine.world;
 
   // run the engine
   const runner = Runner.create();
@@ -50,7 +50,7 @@ function createWorld() {
       { friction: 0.01, isStatic: true },
     ),
   );
-  
+
   // create composite for static bodies
   static = Composite.create();
   Composite.add(world, static);
@@ -93,7 +93,7 @@ function createWorld() {
     Composite.add(static, bag);
   }, 2000);
 }
-  
+
 function manageConnections() {
   // map player.id (used internally) to socket (used to communicate)
   sockets = new Map();
@@ -147,7 +147,7 @@ function manageConnections() {
           y: -f * Math.cos(player.angle)
         };
       }
-      
+
       socket.on('disconnect', () => {
         pop(player); // publicly remove player and drop bag
         sockets.delete(player.id) // forget socket
@@ -167,7 +167,7 @@ function emitRegularUpdates() {
       y: Math.round(b.position.y),
       a: Math.round(b.angle * 100) / 100,
     });
-  
+
     io.volatile.emit('update', gamestate);
   }, 1000 / 60);
 
@@ -197,7 +197,7 @@ function emitRegularUpdates() {
 function manageEvents() {
   // listen for collisions
   Events.on(engine, "collisionStart", ({ pairs }) => {
-    for (const {bodyA, bodyB, activeContacts, collision} of pairs) {
+    for (const { bodyA, bodyB, activeContacts, collision } of pairs) {
       // so far there are only two collisions we care about
       // 1. upgrade: player-on-bag
       // 2. stab: player-on-player
@@ -210,7 +210,7 @@ function manageEvents() {
         handleUpgrade(bodyB, bodyA);
         continue;
       }
-      if (bodyB.shape === 'bag') { 
+      if (bodyB.shape === 'bag') {
         handleUpgrade(bodyA, bodyB);
         continue;
       }
@@ -230,12 +230,12 @@ function manageEvents() {
 
     if (bag.sword > player.sword) player.sword = bag.sword;
     if (bag.shield > player.shield) player.shield = bag.shield;
-  
+
     // inform player of their upgrade
     sockets.get(player.id).emit(
       'upgrade', player.sword, player.shield, bag.tokens
     );
-  
+
     Composite.remove(static, bag); // publically remove bag from world
   }
 
@@ -279,7 +279,7 @@ function manageEvents() {
 
       // disconnect victim
       // this should also publicly remove victim from world and drop bag
-      sockets.get(victim.id).disconnect(); 
+      sockets.get(victim.id).disconnect();
       return;
     }
 
@@ -302,15 +302,15 @@ function pop(entity) {
 function createBag(x, y, tokens, sword, shield) {
   const bag = Bodies.fromVertices(x, y,
     Vertices.fromPath(shapes['bag']), {
-      mass: 0.1,
-      friction: 0.001,
-      isStatic: true,
-      isSensor: true,
-      shape: 'bag',
-      tokens: tokens,
-      sword: sword,
-      shield: shield,
-    }
+    mass: 0.1,
+    friction: 0.001,
+    isStatic: true,
+    isSensor: true,
+    shape: 'bag',
+    tokens: tokens,
+    sword: sword,
+    shield: shield,
+  }
   );
 
   // make bag unavailable for half second

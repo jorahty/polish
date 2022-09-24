@@ -11,7 +11,7 @@ function Game(nickname) {
 
   // if client looks away (and therefore potentially
   // becomes idle) kick back to title scene
-  // window.document.onvisibilitychange = () => Title(socket);
+  window.document.onvisibilitychange = () => Title(socket);
 
   // create matter.js engine, world, render, viewport
   // also decorate world, add terrain
@@ -26,7 +26,7 @@ function Game(nickname) {
 
   // begin listening for events to render
   renderEvents();
-  
+
   // create and configure controls to send input to server
   configControls();
 }
@@ -154,7 +154,7 @@ function renderEvents() {
     }
 
     moveCamera(); // center viewport around player with myId
-    
+
     Render.world(render); // render next frame
   });
 
@@ -218,17 +218,17 @@ function renderEvents() {
       const damageIndicator = Body.create({
         position: { x, y },
         render: {
-          fillStyle: '#ebbb7d',
+          fillStyle: `hsl(${-0.5 * amount + 230}, 61%, 70%)`,
           zIndex: 10,
           lineWidth: 5,
           strokeStyle: '#000',
           text: {
             content: amount,
-            font: '48px tommySoft',
+            font: '48px jetFont',
           },
         },
       });
-  
+
       // render damage indicator for 2 seconds
       Composite.add(world, damageIndicator);
       setTimeout(() => Composite.remove(world, damageIndicator), 2000);
@@ -254,12 +254,13 @@ function renderEvents() {
       .style.setProperty('--health', `${0}%`);
     hitpoints.textContent = 0;
 
-    display(`${nickname} eliminated you`);
-    createElement(ui.messagesContainer, 'p', {
+    removeChildren(ui.controlsContainer)
+    createElement(ui.controlsContainer, 'p', {
       textContent: `${nickname} eliminated you`,
     });
-    createElement(ui.messagesContainer, 'button', {
-      textContent: `damn.`,
+    createElement(ui.controlsContainer, 'button', {
+      id: 'goBack',
+      textContent: '→',
       onclick: () => Title(socket),
     });
   });

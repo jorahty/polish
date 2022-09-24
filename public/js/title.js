@@ -2,13 +2,14 @@
 function Title(socket) {
   // reset / cleanup
   if (socket && socket.close) socket.close();
+  Common._nextId = 0;
   removeChildren(document.body);
-  
+
   // create form for joining game
   const form = createElement(document.body, 'form',
     { id: 'joinForm' }
   );
-  
+
   const textfield = createElement(form, 'input', {
     type: 'text',
     placeholder: 'Name',
@@ -20,9 +21,8 @@ function Title(socket) {
 
   if (textfield.value) textfield.focus();
 
-  const go = createElement(form, 'input', {
-    type: 'submit',
-    value: '→',
+  const go = createElement(form, 'button', {
+    textContent: '→',
     disabled: !isValid(textfield.value),
     id: 'go',
   });
