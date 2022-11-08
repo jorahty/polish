@@ -45,6 +45,7 @@ function createWorld() {
       width: 800,
       height: 850,
       hasBounds: true,
+      background: '#89a',
     },
   });
 
@@ -60,9 +61,25 @@ function createWorld() {
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(shapes['terrain']), {
       isStatic: true, // needed for correct positioning
-      render: { fillStyle: '#789' },
+      render: { fillStyle: 'transparent' },
+      // render: { fillStyle: '#ff00ffaa' },
     }
     ),
+  );
+
+  // add background
+  Composite.add(world,
+    Bodies.rectangle(0, 0, 8192, 3821, {
+      label: 'bg',
+      render: {
+        zIndex: -10,
+        sprite: {
+          texture: './img/bg.jpg',
+          xOffset: -0.0169,
+          yOffset: -0.0102,
+        }
+      },
+    }),
   );
 
   // create composite for bodies managed by server
@@ -149,8 +166,15 @@ function renderEvents() {
     for (const { id, shape, position, angle } of info) {
       Composite.add(fromServer,
         Bodies.fromVertices(position.x, position.y,
-          Vertices.fromPath(shapes[shape]),
-          { id, angle: angle ? angle : 0 }
+          Vertices.fromPath(shapes[shape]), {
+          id: id,
+          angle: angle || 0,
+          render: {
+            sprite: {
+              texture: `./img/${shape}.png`,
+            },
+          }
+        }
         )
       );
     }
@@ -310,6 +334,7 @@ function renderEvents() {
 
     // reset health, sword, shield
     ui.setHealth(100, 100);
+    ui.sword.level = ui.shield.level = 0;
     ui.sword.style.fill = ui.shield.style.fill = rarityColors.get(0);
   });
 }

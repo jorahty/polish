@@ -7,6 +7,14 @@ function Title() {
     { id: 'joinForm' }
   );
 
+  // logo
+  const logo = createElement(document.body, 'svg');
+  fetch('./img/title.svg')
+    .then(r => r.text())
+    .then(r => {
+      logo.outerHTML = r;
+    });
+
   const textfield = createElement(form, 'input', {
     type: 'text',
     placeholder: 'Name',

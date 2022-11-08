@@ -47,7 +47,7 @@ function createWorld() {
   Composite.add(world,
     Bodies.fromVertices(0, 0,
       Vertices.fromPath(shapes['terrain']),
-      { friction: 0.01, isStatic: true },
+      { friction: 0.1, isStatic: true },
     ),
   );
 
@@ -92,6 +92,19 @@ function createWorld() {
     );
     Composite.add(static, bag);
   }, 2000);
+
+  // spawn a soccer ball in the middle of the map
+  for (let i = 0; i < 10; i++) {
+    const ball = Bodies.fromVertices(400 + 800 * Math.random(), -100,
+      Vertices.fromPath(shapes['ball']), {
+      mass: 0.1,
+      friction: 0.02,
+      restitution: 0.9,
+      shape: 'ball',
+    }
+    );
+    Composite.add(dynamic, ball);
+  }
 }
 
 function manageConnections() {
@@ -323,8 +336,6 @@ function pop(entity) {
 function createBag(x, y, tokens, sword, shield) {
   const bag = Bodies.fromVertices(x, y,
     Vertices.fromPath(shapes['bag']), {
-    mass: 0.1,
-    friction: 0.001,
     isStatic: true,
     isSensor: true,
     shape: 'bag',
