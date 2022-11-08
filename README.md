@@ -1,4 +1,5 @@
-# Toolmax
+
+# ![Toolmax](public/img/title.svg)
 
 A game with:
 - competitive real-time multiplayer
