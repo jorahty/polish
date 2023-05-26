@@ -1,5 +1,5 @@
 {
-  "name": "keygo",
+  "name": "toolmax",
   "dependencies": {
     "express": "*",
     "socket.io": "*",
